@@ -5,6 +5,14 @@ dotenv.config();
 import cors from "cors";
 import morgan from "morgan";
 import authRoutes from "./routes/auth.js";
+import customerRoutes from "./routes/customer.js"
+import supplierRoutes from "./routes/supplier.js"
+import itemmasterRoutes from "./routes/item-master.js";
+import stockRoutes from "./routes/item-stock.js"
+import customerPORoutes from "./routes/customerPO.js";
+import purchaseOrderRoutes from "./routes/purchase-order.js"
+import profitLossRoutes  from "./routes/profit-loss.js"
+import itemUtilizationRoute from "./routes/item-utilization.js"
 
 const app = express();
 app.use(express.json());
@@ -20,6 +28,14 @@ app.use(cors());
 app.use(morgan("dev"));
 //routes
 app.use("/api", authRoutes);
+app.use("/api",customerRoutes);
+app.use("/api",supplierRoutes);
+app.use("/api",itemmasterRoutes);
+app.use("/api",stockRoutes);
+app.use("/api",customerPORoutes);
+app.use("/api",purchaseOrderRoutes);
+app.use("/api",itemUtilizationRoute);
+app.use("/api",profitLossRoutes)
 
 //connecting to server
 let port = process.env.PORT || 7000;

@@ -51,15 +51,19 @@ export default function VerifyOtp() {
           value={otp}
           onChange={(e) => setOtp(e.target.value)}
           placeholder="Enter 6-digit OTP"
-          className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 mb-4"
+          className="mt-1 block w-full px-4 py-2  rounded-md shadow-sm focus:outline-none focus:ring focus:ring-violet-300"
           required
         />
 
         <button
           type="submit"
-          className="w-full bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700 transition"
+          className="w-full bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-purple-600 hover:to-indigo-500 text-white font-medium py-2 px-4 rounded relative overflow-hidden group transition-all duration-500 cursor-pointer"
         >
-          Verify
+          <span
+            className="inline-block transform transition-transform duration-500 group-hover:translate-x-1"
+          >
+            Verify Otp
+          </span>
         </button>
 
         <p className="text-sm text-gray-600 mt-4 text-center">

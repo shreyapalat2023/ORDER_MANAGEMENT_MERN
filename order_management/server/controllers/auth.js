@@ -20,6 +20,11 @@ export const register = async (req, res) => {
       return res.status(400).json({ error: "Password must be at least 6 characters long" });
     }
 
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      return res.status(400).json({ error: "Invalid email format" });
+    }
+
     // Check if user exists
     const existingUser = await User.findOne({ email });
     if (existingUser) {
@@ -65,6 +70,11 @@ export const login = async (req, res) => {
     }
     if (!password || password.length < 6) {
       return res.json({ error: "Password must be at least 6 characters long" });
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      return res.status(400).json({ error: "Invalid email format" });
     }
     //verfifying user with email
     const user = await User.findOne({ email });
@@ -219,9 +229,9 @@ export const resetPasswordWithOtp = async (req, res) => {
   try {
     const { email, newPassword } = req.body;
     console.log("email", email, newPassword);
-
-    if (!newPassword) {
-      return res.status(400).json({ error: "All fields are required" });
+    
+    if (!newPassword || newPassword.length < 6) {
+      return res.json({ error: "Password must be at least 6 characters long" });
     }
     const user = await User.findOne({ email });
     user.password = await hashPassword(newPassword);

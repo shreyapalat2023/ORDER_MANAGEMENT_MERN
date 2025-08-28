@@ -36,7 +36,7 @@ export default function ForgotPassword() {
                             id="email"
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
-                            className="mt-1 block w-full px-4 py-2 border rounded-md shadow-sm focus:outline-none focus:ring focus:ring-blue-200"
+                            className="mt-1 block w-full px-4 py-2  rounded-md shadow-sm focus:outline-none focus:ring focus:ring-violet-300"
                             placeholder="you@example.com"
                             required
                         />
@@ -44,6 +44,9 @@ export default function ForgotPassword() {
                     <button
                         type="submit"
                         className="w-full bg-blue-600 text-white rounded py-2 hover:bg-blue-700 cursor-pointer"
+                        style={{
+                            background: "linear-gradient(135deg, #667eea, #764ba2)",
+                        }}
                     >
                         Send OTP
                     </button>

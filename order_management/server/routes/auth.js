@@ -7,13 +7,13 @@ import { register, login, forgotPassword, verifyOtp, resendOtp, resetPasswordWit
 import { requireSignIn, isAdmin } from "../middlewares/auth.js"
 
 
-
+//user authentication
 router.post("/register", register);
 router.post("/login", login);
+//Reset password routes
 router.post("/forgot-password", forgotPassword);
 router.post("/verify-otp", verifyOtp);
 router.post('/resend-otp', resendOtp);
-
 router.post("/reset-password", resetPasswordWithOtp);
 router.get("/auth-check", requireSignIn, (req, res) => {
     res.json({ ok: true });

@@ -1,46 +1,55 @@
-import { ContactsFilled, HomeFilled, LogoutOutlined } from "@ant-design/icons";
+import { UserOutlined, HomeFilled, PoweroffOutlined } from "@ant-design/icons";
 import { useAuth } from "../../context/auth";
 import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
+import { Tooltip } from "antd";
 
 export default function Header() {
   const [auth, setAuth] = useAuth();
   const navigate = useNavigate();
-  
+
   const handleLogout = () => {
-    setAuth({ user: null, token: "" }); // clear context
-    localStorage.removeItem("auth");    // clear storage
+    setAuth({ user: null, token: "" });
+    localStorage.removeItem("auth");
     toast.success("Logged out successfully");
-    navigate("/login");                 // redirect
+    navigate("/login");
   };
+
   return (
-    <header className="flex items-center justify-between bg-gradient-to-r from-blue-500 to-indigo-600 px-6 py-4 shadow-md border-b border-blue-700 text-white">
-      {/* Logo and Title */}
-      <div className="flex items-center gap-2 text-lg font-semibold">
-        <HomeFilled className="text-white text-xl" />
-        <span className="">Order Management</span>
+    <header
+      className="sticky top-0 z-40 flex items-center justify-between px-6 py-4 shadow-md text-white bg-gradient-to-r from-indigo-500 to-purple-600"
+      style={{
+        background: "linear-gradient(135deg, #667eea, #764ba2)",
+      }}
+    >
+      {/* Left: Logo and Title */}
+      <div className="flex items-center gap-3 text-xl font-semibold tracking-wide">
+        <HomeFilled className="text-white text-2xl" />
+        <span>Order Management</span>
       </div>
 
-      {/* Search + User Section */}
+      {/* Right: User and Logout */}
       <div className="flex items-center gap-4">
-        {/* Search Input */}
-        <input
-          type="text"
-          placeholder="Search..."
-          className="px-3 py-1 rounded-lg text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-300"
-        />
-
         {/* User Info */}
-        <div className="flex items-center gap-2 bg-white px-3 py-1 rounded-full shadow hover:shadow-md transition duration-200">
-          <span className="text-gray-800 font-medium">{auth?.user?.username ? `${auth.user.username}` : "user"}</span>
-          <ContactsFilled style={{ color: '#2563eb' }} />
+        <div className="flex items-center gap-2 bg-white text-gray-800 px-4 py-1.5 rounded-full shadow-md hover:shadow-lg transition duration-200">
+          <span className="text-sm font-medium capitalize">
+            {auth?.user?.username || "User"}
+          </span>
+          <UserOutlined className="text-blue-600" />
         </div>
-        {auth?.token ?
-          <LogoutOutlined style={{ fontSize: '20px', cursor: 'pointer' }} onClick={handleLogout} /> : ""
-        }
 
+        {/* Logout Icon */}
+        {auth?.token && (
+          <Tooltip title="logout">
+            <button
+              onClick={handleLogout}
+              className="p-2 rounded-full hover:bg-white/10 transition duration-200 cursor-pointer"
+            >
+              <PoweroffOutlined className="text-white text-lg" />
+            </button>
+          </Tooltip>
+        )}
       </div>
     </header>
   );
 }
-

@@ -11,8 +11,14 @@ import ForgotPassword from "./pages/auth/ForgotPassword.jsx"
 import VerifyOtp from './pages/auth/VerifyOtp.jsx';
 import ResetPassword from "./pages/auth/ResetPassword.jsx"
 
-import AdminDashboard from "./pages/admin/Dashboard.jsx"
 import AdminRoute from './routes/AdminRoute.jsx';
+import MainLayout from "./pages/MainLayout.jsx"
+import Dashboard from "./pages/admin/Dashboard.jsx"
+import Customer from "./pages/customer/Customer.jsx"
+import Supplier from "./pages/Supplier/Supplier.jsx"
+import ItemMasterPage from "./pages/ItemMaster/ItemMasterPage.jsx"
+import CustomerPOPage from './pages/customerPO/customerPOPage.jsx';
+import ManagePurchases from './pages/PurchaseOrder/ManagePurchase.jsx';
 
 function App() {
   const PageNotFound = () => {
@@ -22,7 +28,7 @@ function App() {
   return (
     <>
       <BrowserRouter>
-    <Header/>
+        <Header />
         <Toaster />
         <Routes>
           <Route path='/' element={<Home />} />
@@ -32,8 +38,15 @@ function App() {
           <Route path='/verify-otp' element={<VerifyOtp />} />
           <Route path='/reset-password' element={<ResetPassword />} />
           {/* dashboard */}
-          <Route path='/dashboard' element={<AdminRoute/>}>
-            <Route path="admin" element={<AdminDashboard />}></Route>
+          <Route path='/admin' element={<AdminRoute />}>
+            <Route path="main" element={<MainLayout />}>
+            <Route path='dashboard' element={<Dashboard/>}></Route>
+              <Route path="customers" element={<Customer />}></Route>
+              <Route path="suppliers" element={<Supplier />}></Route>
+              <Route path='item-master' element={<ItemMasterPage/>}></Route>
+              <Route path='customer-po' element={<CustomerPOPage/>}></Route>
+              <Route path='purchase-order' element={<ManagePurchases/>}></Route>
+            </Route>
           </Route>
           <Route path="*" element={<PageNotFound />} replace></Route>
         </Routes>

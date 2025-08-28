@@ -41,16 +41,20 @@ export default function ResetPassword() {
                             type="password"
                             value={newPassword}
                             onChange={(e) => setNewPassword(e.target.value)}
-                            className="mt-1 block w-full px-4 py-2 border rounded-md"
+                            className="mt-1 block w-full px-4 py-2  rounded-md shadow-sm focus:outline-none focus:ring focus:ring-violet-300"
                             placeholder="At least 6 characters"
                             required
                         />
                     </div>
                     <button
                         type="submit"
-                        className="w-full bg-blue-600 text-white rounded py-2 hover:bg-blue-700 cursor-pointer"
+                        className="w-full bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-purple-600 hover:to-indigo-500 text-white font-medium py-2 px-4 rounded relative overflow-hidden group transition-all duration-500 cursor-pointer"
                     >
-                        Reset Password
+                        <span
+                            className="inline-block transform transition-transform duration-500 group-hover:translate-x-1"
+                        >
+                            Reset Password
+                        </span>
                     </button>
                 </form>
             </div>

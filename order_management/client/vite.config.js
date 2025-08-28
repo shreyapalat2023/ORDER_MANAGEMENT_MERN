@@ -10,6 +10,8 @@ export default defineConfig({
   ],
   server: {
     port: 3000, // 🔁 Change this to whatever port you want
+     historyApiFallback: true,
+      appType: 'spa', 
   },
 
 })

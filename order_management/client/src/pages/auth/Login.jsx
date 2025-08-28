@@ -1,4 +1,12 @@
 import toast, { Toaster } from "react-hot-toast";
+import {
+    EyeOutlined,
+    EyeInvisibleOutlined,
+    MailOutlined,
+    LockOutlined,
+} from "@ant-design/icons";
+
+
 import axios from "axios";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
@@ -10,6 +18,7 @@ export default function Login() {
     const [email, setEmail] = useState("palatshreya@gmail.com");
     const [password, setPassword] = useState("shrgar@89");
     const [remember, setRemember] = useState(false);
+    const [showPassword, setShowPassword] = useState(false);
 
     //saving user login response in context
     const [auth, setAuth] = useAuth();
@@ -34,7 +43,7 @@ export default function Login() {
                 localStorage.setItem("auth", JSON.stringify(data));
                 setAuth({ ...auth, token: data.token, user: data.user });
                 toast.success("Login successful");
-                navigate("/dashboard/admin");
+                navigate("/admin/main/dashboard");
             }
 
             //remember email
@@ -61,40 +70,62 @@ export default function Login() {
                 <form className="space-y-5" onSubmit={handleSubmit}>
                     {/* email */}
 
-                    <div>
+                    <div className="relative">
                         <label htmlFor="email" className="block text-sm font-medium text-gray-700">Email</label>
+                        <span className="absolute left-3 top-8 text-gray-500">
+                            <MailOutlined />
+                        </span>
                         <input
                             id="email"
                             name="email"
                             type="email"
-                            required
+                            value={email}
                             onChange={(e) => setEmail(e.target.value)}
-                            className="mt-1 block w-full px-4 py-2 border rounded-md shadow-sm focus:outline-none focus:ring focus:ring-blue-200"
-                        />
-                    </div>
-                    {/* password */}
-                    <div>
-                        <label htmlFor="password" className="block text-sm font-medium text-gray-700">Password</label>
-                        <input
-                            id="password"
-                            name="password"
-                            type="password"
-                            onChange={(e) => setPassword(e.target.value)}
                             required
-                            className="mt-1 block w-full px-4 py-2 border rounded-md shadow-sm focus:outline-none focus:ring focus:ring-blue-200"
+                            className="mt-1 block w-full px-10 py-2 rounded-md shadow-sm focus:outline-none focus:ring focus:ring-violet-300"
                         />
                     </div>
 
+                    {/* password */}
+                    <div className="relative">
+                        <label htmlFor="password" className="block text-sm font-medium text-gray-700">Password</label>
+
+                        {/* Left Lock Icon */}
+                        <span className="absolute left-3 top-8 text-gray-500">
+                            <LockOutlined />
+                        </span>
+
+                        {/* Password Input */}
+                        <input
+                            id="password"
+                            name="password"
+                            type={showPassword ? "text" : "password"}
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
+                            required
+                            className="mt-1 block w-full px-10 py-2 pr-10 rounded-md shadow-sm focus:outline-none focus:ring focus:ring-violet-300"
+                        />
+
+                        {/* Right Eye Toggle */}
+                        <span
+                            className="absolute right-3 top-8 text-gray-500 cursor-pointer"
+                            onClick={() => setShowPassword(!showPassword)}
+                        >
+                            {showPassword ? <EyeInvisibleOutlined /> : <EyeOutlined />}
+                        </span>
+                    </div>
+                    {/* Remember me */}
                     <div className="flex items-center justify-between text-sm">
                         <label className="flex items-center gap-2">
                             <input
                                 type="checkbox"
                                 name="remember"
-                                className="rounded"
+                                className="rounded cursor-pointer"
                                 onChange={(e) => setRemember(e.target.checked)}
                             />
                             Remember Me
                         </label>
+                        {/* forgot password  */}
                         <div>
 
                             <button
@@ -105,7 +136,7 @@ export default function Login() {
                                 Forgot Password?
                             </button>
                         </div>
-
+                        {/* new user */}
                         <button
                             type="button"
                             className="text-blue-600 hover:underline cursor-pointer"
@@ -117,10 +148,15 @@ export default function Login() {
 
                     <button
                         type="submit"
-                        className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded transition cursor-pointer"
+                        className="w-full bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-purple-600 hover:to-indigo-500 text-white font-medium py-2 px-4 rounded relative overflow-hidden group transition-all duration-500 cursor-pointer"
                     >
-                        Login
+                        <span
+                            className="inline-block transform transition-transform duration-500 group-hover:translate-x-1"
+                        >
+                            Login
+                        </span>
                     </button>
+
                 </form>
             </div>
         </div>
