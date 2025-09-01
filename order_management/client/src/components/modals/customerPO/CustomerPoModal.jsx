@@ -148,9 +148,13 @@ export default function CustomerPOModal({ onClose, onSave, po }) {
                                             onChange={(e) => setCustomer(e.target.value)}
                                         >
                                             <option value="">Select Customer</option>
-                                            {customerList.map((cust) => (
-                                                <option key={cust._id} value={cust._id}>{cust.name}</option>
-                                            ))}
+                                            {customerList
+                                                .filter((cust) => cust.status === "Active") // ✅ Only Active
+                                                .map((cust) => (
+                                                    <option key={cust._id} value={cust._id}>
+                                                        {cust.name}
+                                                    </option>
+                                                ))}
                                         </select>
                                     </div>
 

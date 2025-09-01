@@ -4,7 +4,7 @@ import toast from "react-hot-toast";
 import useScrollLock from "../../../customhooks/useScrollLock";
 
 const ItemModal = ({ onClose, onItemSaved, itemToEdit }) => {
-  useScrollLock(true)
+  useScrollLock(true);
   const isEditing = !!itemToEdit;
 
   const [form, setForm] = useState({
@@ -15,9 +15,10 @@ const ItemModal = ({ onClose, onItemSaved, itemToEdit }) => {
     stock: [],
     unit: "Pcs",
     status: "Active",
-    description: ""
+    description: "",
   });
 
+  const [errors, setErrors] = useState({});
   const [suppliers, setSuppliers] = useState([]);
 
   useEffect(() => {
@@ -42,20 +43,42 @@ const ItemModal = ({ onClose, onItemSaved, itemToEdit }) => {
         supplier: "",
         category: "",
         brand: "",
-        stock:[],
+        stock: [],
         unit: "Pcs",
         status: "Active",
-        description: ""
+        description: "",
       });
     }
+    setErrors({});
   }, [itemToEdit, isEditing]);
+
+  const validateForm = () => {
+    let newErrors = {};
+
+    if (!form.name.trim()) newErrors.name = "Item name is required";
+    if (!form.supplier) newErrors.supplier = "Supplier is required";
+    if (!form.category.trim()) newErrors.category = "Category is required";
+    if (!form.brand.trim()) newErrors.brand = "Brand is required";
+    if (!form.unit) newErrors.unit = "Unit is required";
+    if (!form.status) newErrors.status = "Status is required";
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     setForm({ ...form, [name]: value });
+
+    // clear error on typing
+    if (errors[name]) {
+      setErrors({ ...errors, [name]: "" });
+    }
   };
 
   const handleSubmit = async () => {
+    if (!validateForm()) return;
+
     try {
       if (isEditing) {
         await axios.put(`/items/${itemToEdit._id}`, form);
@@ -72,7 +95,6 @@ const ItemModal = ({ onClose, onItemSaved, itemToEdit }) => {
   };
 
   return (
-
     <div className="fixed inset-0 bg-black/30 flex items-center justify-center z-50">
       <div className="bg-gradient-to-br from-white via-slate-50 to-gray-100 w-full max-w-sm p-4 rounded-xl shadow-xl border border-gray-200">
         <h2 className="text-xl font-semibold text-center mb-4 text-blue-800 tracking-wide">
@@ -80,6 +102,7 @@ const ItemModal = ({ onClose, onItemSaved, itemToEdit }) => {
         </h2>
 
         <div className="space-y-3 max-h-[70vh] overflow-y-auto pr-1">
+          {/* Item Name */}
           <div className="flex flex-col">
             <label className="mb-1 text-sm font-medium text-gray-700">
               Item Name <span className="text-red-500">*</span>
@@ -89,8 +112,15 @@ const ItemModal = ({ onClose, onItemSaved, itemToEdit }) => {
               value={form.name}
               onChange={handleChange}
               placeholder="Enter Item Name"
-              className="border border-gray-300 px-3 py-1.5 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-violet-500 transition-all duration-200 shadow-sm"
+              className={`border px-3 py-1.5 rounded-md text-sm shadow-sm focus:outline-none focus:ring-2 transition-all duration-200 ${
+                errors.name
+                  ? "border-red-500 focus:ring-red-500"
+                  : "border-gray-300 focus:ring-violet-500"
+              }`}
             />
+            {errors.name && (
+              <span className="text-xs text-red-500 mt-1">{errors.name}</span>
+            )}
           </div>
 
           {/* Supplier Dropdown */}
@@ -102,19 +132,29 @@ const ItemModal = ({ onClose, onItemSaved, itemToEdit }) => {
               name="supplier"
               value={form.supplier}
               onChange={handleChange}
-              className="border border-gray-300 px-3 py-1.5 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-200 shadow-sm"
+              className={`border px-3 py-1.5 rounded-md text-sm shadow-sm focus:outline-none focus:ring-2 transition-all duration-200 ${
+                errors.supplier
+                  ? "border-red-500 focus:ring-red-500"
+                  : "border-gray-300 focus:ring-blue-500"
+              }`}
             >
               <option value="">Select Supplier</option>
-              {suppliers.map((s) => (
-                <option key={s._id} value={s._id}>
-                  {s.name}
-                </option>
-              ))}
+              {suppliers
+                .filter((s) => s.status === "Active")
+                .map((s) => (
+                  <option key={s._id} value={s._id}>
+                    {s.name}
+                  </option>
+                ))}
             </select>
+            {errors.supplier && (
+              <span className="text-xs text-red-500 mt-1">
+                {errors.supplier}
+              </span>
+            )}
           </div>
 
-
-          {/* Other Fields */}
+          {/* Category & Brand */}
           {["category", "brand"].map((field) => (
             <div key={field} className="flex flex-col">
               <label className="mb-1 text-sm font-medium text-gray-700 capitalize">
@@ -125,8 +165,17 @@ const ItemModal = ({ onClose, onItemSaved, itemToEdit }) => {
                 value={form[field]}
                 onChange={handleChange}
                 placeholder={`Enter ${field}`}
-                className="border border-gray-300 px-3 py-1.5 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-violet-500 transition-all duration-200 shadow-sm"
+                className={`border px-3 py-1.5 rounded-md text-sm shadow-sm focus:outline-none focus:ring-2 transition-all duration-200 ${
+                  errors[field]
+                    ? "border-red-500 focus:ring-red-500"
+                    : "border-gray-300 focus:ring-violet-500"
+                }`}
               />
+              {errors[field] && (
+                <span className="text-xs text-red-500 mt-1">
+                  {errors[field]}
+                </span>
+              )}
             </div>
           ))}
 
@@ -139,13 +188,20 @@ const ItemModal = ({ onClose, onItemSaved, itemToEdit }) => {
               name="unit"
               value={form.unit}
               onChange={handleChange}
-              className="border border-gray-300 px-3 py-1.5 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-200 shadow-sm"
+              className={`border px-3 py-1.5 rounded-md text-sm shadow-sm focus:outline-none focus:ring-2 transition-all duration-200 ${
+                errors.unit
+                  ? "border-red-500 focus:ring-red-500"
+                  : "border-gray-300 focus:ring-blue-500"
+              }`}
             >
               <option value="Pcs">Pcs</option>
               <option value="Feet">Feet</option>
               <option value="Kg">Kg</option>
               <option value="Litre">Litre</option>
             </select>
+            {errors.unit && (
+              <span className="text-xs text-red-500 mt-1">{errors.unit}</span>
+            )}
           </div>
 
           {/* Status */}
@@ -157,16 +213,23 @@ const ItemModal = ({ onClose, onItemSaved, itemToEdit }) => {
               name="status"
               value={form.status}
               onChange={handleChange}
-              className="border border-gray-300 px-3 py-1.5 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-200 shadow-sm"
+              className={`border px-3 py-1.5 rounded-md text-sm shadow-sm focus:outline-none focus:ring-2 transition-all duration-200 ${
+                errors.status
+                  ? "border-red-500 focus:ring-red-500"
+                  : "border-gray-300 focus:ring-blue-500"
+              }`}
             >
               <option value="Active">Active</option>
               <option value="Inactive">Inactive</option>
             </select>
+            {errors.status && (
+              <span className="text-xs text-red-500 mt-1">{errors.status}</span>
+            )}
           </div>
         </div>
 
         {/* Description */}
-        <div className="flex flex-col">
+        <div className="flex flex-col mt-3">
           <label className="mb-1 text-sm font-medium text-gray-700">
             Description
           </label>
@@ -179,6 +242,7 @@ const ItemModal = ({ onClose, onItemSaved, itemToEdit }) => {
             rows={3}
           />
         </div>
+
         {/* Buttons */}
         <div className="mt-6 flex justify-end gap-3">
           <button

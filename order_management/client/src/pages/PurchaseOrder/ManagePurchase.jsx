@@ -79,6 +79,7 @@ export default function ManagePurchases() {
         <>
             <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-7xl mx-auto">
                 <h2 className="text-2xl font-bold text-teal-800 mb-6">Manage Purchases</h2>
+                {/* <pre>{JSON.stringify(purchaseList,null,4)}</pre> */}
 
                 {/* Filters + Action Buttons */}
                 <div className="flex flex-col gap-4 mb-6">

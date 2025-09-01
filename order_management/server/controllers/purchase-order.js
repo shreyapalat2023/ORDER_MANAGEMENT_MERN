@@ -126,30 +126,28 @@ export const remove = async (req, res) => {
     res.status(500).json({ error: "Server Error" });
   }
 }
-//updateItem
-
+// updateItem
 export const updateItem = async (req, res) => {
   try {
-
     const { Id, itemId } = req.params;
     const updatedItemData = req.body;
 
-    //Find the purchase order
-
+    // Find the purchase order
     const purchaseOrder = await PurchaseOrder.findById(Id);
     if (!purchaseOrder) {
       return res.status(404).json({ message: "Purchase Order not found" });
     }
 
-    //Find the item subdocument
+    // Find the item subdocument
     const item = purchaseOrder.items.id(itemId);
     if (!item) {
       return res.status(404).json({ message: "Item not found in this Purchase Order" });
     }
-    //update item fields
+
+    // Update item fields
     Object.keys(updatedItemData).forEach((key) => {
       item[key] = updatedItemData[key];
-    })
+    });
 
     // Recalculate total purchase amount
     purchaseOrder.totalPurchaseAmount = purchaseOrder.items.reduce(
@@ -159,31 +157,52 @@ export const updateItem = async (req, res) => {
 
     await purchaseOrder.save();
 
+    res.json({
+      message: "Item updated successfully",
+      data: item
+    });
   } catch (error) {
-    console.error("Error updating purchase order item:", err);
-    res.status(500).json({ message: "Server error", error: err.message });
+    console.error("Error updating purchase order item:", error);
+    res.status(500).json({ message: "Server error", error: error.message });
   }
-}
+};
 
-//getItem
-
+// getItem
 export const getItem = async (req, res) => {
   try {
     const { Id, itemId } = req.params;
-    const purchaseOrder = await PurchaseOrder.findById(Id).populate("items.item","name");
+
+    const purchaseOrder = await PurchaseOrder.findById(Id).populate("items.item", "name");
     if (!purchaseOrder) {
       return res.status(404).json({ message: "Purchase Order not found" });
     }
 
-    const item = purchaseOrder.items.item.id(itemId);
+    const item = purchaseOrder.items.id(itemId);
     if (!item) {
       return res.status(404).json({ message: "Item not found in this Purchase Order" });
     }
+
     res.json(item);
   } catch (error) {
     console.error("Error Getting Item", error);
-    res.status(500).json({ error: "Server Error" })
+    res.status(500).json({ error: "Server Error" });
   }
-}
+};
 
+
+// 5. Delete item from PurchaseOrder
+export const removeItem = async (req, res) => {
+  try {
+    const { Id, itemId } = req.params;
+    const order = await PurchaseOrder.findById(Id);
+    if (!order) return res.status(404).json({ message: "Purchase order not found" });
+
+    order.items.id(itemId).deleteOne();
+    await order.save();
+
+    res.json(order);
+  } catch (err) {
+    res.status(500).json({ message: "Error deleting item", error: err.message });
+  }
+};
 

@@ -44,8 +44,8 @@ export default function PurchaseOrderModal({ onClose, onSave, purchaseOrder }) {
         try {
             const { data } = await axios.get("/customer-pos");
             setCustomerPOList(data || []);
-            console.log("customer-po",data);
-            
+            console.log("customer-po", data);
+
             setCustomers(data)
         } catch {
             toast.error("Failed to fetch customer POs");
@@ -88,6 +88,7 @@ export default function PurchaseOrderModal({ onClose, onSave, purchaseOrder }) {
                     `/purchase-order/${purchaseOrder._id}/items/${itemToEdit._id}`
                 );
                 setEditingItemIndex(index);
+                setEditingItem(data)
                 setShowItemModal(true);
 
                 // Pass fresh data to modal
@@ -102,6 +103,7 @@ export default function PurchaseOrderModal({ onClose, onSave, purchaseOrder }) {
             }
         } else {
             setEditingItemIndex(index);
+            setEditingItem(itemToEdit)
             setShowItemModal(true);
         }
     };
@@ -208,9 +210,10 @@ export default function PurchaseOrderModal({ onClose, onSave, purchaseOrder }) {
                                     className="w-full border rounded px-3 py-2"
                                 >
                                     <option value="">Select Customer</option>
-                                    {customers.map((cust) => (
-                                        <option key={cust._id} value={cust.customer._id}>{cust.customer.name}</option>
-                                    ))}
+                                    {customers.filter((cust) => cust.status === "Active")
+                                        .map((cust) => (
+                                            <option key={cust._id} value={cust.customer._id}>{cust.customer.name}</option>
+                                        ))}
                                 </select>
                             </div>
 
@@ -332,6 +335,8 @@ export default function PurchaseOrderModal({ onClose, onSave, purchaseOrder }) {
                     }}
                     onSave={handleSaveItem}
                     existingItem={editingItem}
+                    customerPO={customerPO}
+                    purchaseOrderId={purchaseItems._id}
                 />
             )}
         </div>

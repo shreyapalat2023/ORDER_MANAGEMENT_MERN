@@ -13,6 +13,7 @@ import customerPORoutes from "./routes/customerPO.js";
 import purchaseOrderRoutes from "./routes/purchase-order.js"
 import profitLossRoutes  from "./routes/profit-loss.js"
 import itemUtilizationRoute from "./routes/item-utilization.js"
+import dashboardRtoues from "./routes/dashboard.js"
 
 const app = express();
 app.use(express.json());
@@ -35,7 +36,8 @@ app.use("/api",stockRoutes);
 app.use("/api",customerPORoutes);
 app.use("/api",purchaseOrderRoutes);
 app.use("/api",itemUtilizationRoute);
-app.use("/api",profitLossRoutes)
+app.use("/api",profitLossRoutes);
+app.use("/api",dashboardRtoues)
 
 //connecting to server
 let port = process.env.PORT || 7000;

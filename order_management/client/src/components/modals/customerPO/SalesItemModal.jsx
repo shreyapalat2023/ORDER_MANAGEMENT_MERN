@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import { CloseOutlined } from "@ant-design/icons";
-import axios from "axios";
 import toast from "react-hot-toast";
 
 export default function SalesItemModal({ onClose, onSave, editItem, itemList = [] }) {
@@ -30,8 +29,8 @@ export default function SalesItemModal({ onClose, onSave, editItem, itemList = [
         if (item) {
             const selected = itemList.find((i) => i._id === item);
             if (selected) {
-                setAvailableQty(selected.stockQty || 0);
-                const remaining = selected.stockQty - parseInt(allocatedQty || 0);
+                setAvailableQty(selected.totalStock || 0);
+                const remaining = selected.totalStock - parseInt(allocatedQty || 0);
                 setRemainingQty(remaining > 0 ? remaining : 0);
             }
         }

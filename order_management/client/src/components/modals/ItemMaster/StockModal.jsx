@@ -141,7 +141,7 @@ export default function ItemStockModal({ onClose, itemName, itemId }) {
             <div className="bg-gradient-to-br from-white via-slate-50 to-gray-100 w-full max-w-2xl p-5 rounded-xl shadow-xl border border-gray-200 relative max-h-[90vh] overflow-y-auto">
                 <button
                     onClick={onClose}
-                    className="absolute top-4 right-4 text-xl text-gray-600 hover:text-black"
+                    className="absolute top-4 right-4 text-xl text-gray-600 hover:text-black cursor-pointer"
                 >
                     <CloseOutlined />
                 </button>

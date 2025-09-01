@@ -108,3 +108,25 @@ export const remove = async (req, res) => {
     }
 
 }
+
+export const getCustomerPOItems = async (req, res) => {
+  try {
+    const customerPO = await CustomerPO.findById(req.params.id).populate("items.item");
+    if (!customerPO) {
+      return res.status(404).json({ message: "Customer PO not found" });
+    }
+
+    const items = customerPO.items.map(i => ({
+      _id: i.item._id,
+      name: i.item.name,
+      qty: i.qty,
+      unitCost: i.unitCost,
+      tax: i.tax,
+      salesPrice: i.salesPrice,
+    }));
+
+    res.json(items);
+  } catch (err) {
+    res.status(500).json({ message: "Server error", error: err.message });
+  }
+};
