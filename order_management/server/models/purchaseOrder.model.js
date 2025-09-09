@@ -6,7 +6,10 @@ const purchaseOrderSchema = new Schema(
             type: mongoose.Schema.Types.ObjectId,
             ref: "Customer"
         },
-        poNumber: String,
+        poNumber: {
+            type:String,
+            unique:true
+        },
         customerPO: { type: mongoose.Schema.Types.ObjectId, ref: "CustomerPO" },
         date: Date,
         status: { type: String, enum: ['Active', 'Inactive'], default: 'Active' },

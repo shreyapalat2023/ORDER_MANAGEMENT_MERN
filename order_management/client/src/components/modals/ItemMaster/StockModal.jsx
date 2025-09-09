@@ -6,7 +6,9 @@ import useScrollLock from "../../../customhooks/useScrollLock.js";
 import LoadingCompo from "../../loading/LoadingCompo.jsx"
 import StockTable from "./StockTable.jsx";
 
-export default function ItemStockModal({ onClose, itemName, itemId }) {
+export default function ItemStockModal({ onClose, itemName, itemId ,onItemSaved}) {
+
+
     useScrollLock(true);
 
     const [price, setPrice] = useState("");
@@ -96,6 +98,8 @@ export default function ItemStockModal({ onClose, itemName, itemId }) {
             setPrice("");
             setDate("");
             setQuantity("");
+            onClose();
+            onItemSaved();
         } catch (err) {
             console.error("Error saving/updating stock:", err);
             toast.error("Failed to save/update stock");

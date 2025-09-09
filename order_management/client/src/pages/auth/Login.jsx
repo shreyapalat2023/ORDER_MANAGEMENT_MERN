@@ -6,6 +6,8 @@ import {
     LockOutlined,
 } from "@ant-design/icons";
 
+import { Spin } from "antd";
+
 
 import axios from "axios";
 import { useState, useEffect } from "react";
@@ -20,6 +22,8 @@ export default function Login() {
     const [remember, setRemember] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
 
+    const [loading, setLoading] = useState(false);
+
     //saving user login response in context
     const [auth, setAuth] = useAuth();
     const navigate = useNavigate();
@@ -33,6 +37,7 @@ export default function Login() {
     }, []);
 
     const handleSubmit = async (e) => {
+        setLoading(true)
         e.preventDefault();
         try {
             const { data } = await axios.post("/login", { email, password })
@@ -59,12 +64,19 @@ export default function Login() {
         } catch (err) {
             console.log(err);
             toast.error("Login failed. Try Again");
+        } finally {
+            setLoading(false)
         }
     }
 
     return (
         <div className="min-h-screen flex items-center justify-center bg-gray-100">
             <div className="w-full max-w-md bg-white rounded-xl shadow-lg p-8">
+                {loading && (
+                    <div className="absolute inset-0 bg-gray-100 bg-opacity-80 flex items-center justify-center z-50">
+                        <Spin size="large" />
+                    </div>
+                )}
                 <h2 className="text-2xl font-semibold text-center mb-6 text-gray-800">Welcome to Order Management System</h2>
 
                 <form className="space-y-5" onSubmit={handleSubmit}>

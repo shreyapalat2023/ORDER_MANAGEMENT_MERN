@@ -38,15 +38,11 @@ export const list = async (req, res) => {
     const purchaseOrders = await PurchaseOrder.find({})
       .populate("customer", "name")
       .populate("customerPO", "poNumber")
-      .populate("items.item","name");
-
-    if (!purchaseOrders || purchaseOrders.length === 0) {
-      return res.status(404).json({ error: "Order list not found" });
-    }
+      .populate("items.item", "name");
 
     res.status(200).json({
       message: "Order list fetched successfully",
-      data: purchaseOrders
+      data: purchaseOrders || [],
     });
   } catch (error) {
     console.error("Error fetching purchase orders:", error);
@@ -205,4 +201,21 @@ export const removeItem = async (req, res) => {
     res.status(500).json({ message: "Error deleting item", error: err.message });
   }
 };
+
+//get purchase orders by item
+
+export const getPurchaseOrdersByItem = async (req,res) =>{
+  try {
+
+    const {itemId} = req.params;
+    const purchaseOrders = await PurchaseOrder.find({
+      "items.item":itemId,
+    }).populate("items.item","name category brand").lean();
+
+    res.json({success:true,data:purchaseOrders});
+    
+  } catch (error) {
+    res.status(500).json({ success: false, message: "Error fetching purchase orders" });
+  }
+}
 

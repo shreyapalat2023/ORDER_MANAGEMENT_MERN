@@ -13,6 +13,8 @@ export default function PurchaseItemModal({ onClose, onSave, initialItem, custom
     const [invoiceNo, setInvoiceNo] = useState(initialItem?.invoiceNo || `INV-${Date.now()}`);
     const [invoiceDate, setInvoiceDate] = useState(initialItem?.invoiceDate || "");
 
+    const [error, setError] = useState(""); // validation error
+
     useEffect(() => {
         if (customerPO) {
             fetchItems();
@@ -22,7 +24,6 @@ export default function PurchaseItemModal({ onClose, onSave, initialItem, custom
     const fetchItems = async () => {
         try {
             const { data } = await axios.get(`/customer-pos/${customerPO}/items`);
-            console.log("CustomerPO items", data);
             setItems(data || []);
         } catch (error) {
             toast.error("Failed to fetch CustomerPO items");
@@ -37,13 +38,31 @@ export default function PurchaseItemModal({ onClose, onSave, initialItem, custom
         } else {
             setAvailableQty(0);
         }
+        setAllocatedQty(""); // reset when changing item
+        setError("");
+    };
+
+    const handleAllocatedQtyChange = (value) => {
+        setAllocatedQty(value);
+        if (Number(value) > Number(availableQty)) {
+            setError("Allocated quantity cannot exceed available quantity");
+        } else {
+            setError("");
+        }
     };
 
     const handleSave = () => {
         if (!itemId || !allocatedQty || !unitCost || !purchasePrice || !invoiceNo || !invoiceDate) {
-            toast.error("All required fields must be filled");
+            setError("All required fields must be filled");
             return;
         }
+
+        if (Number(allocatedQty) > Number(availableQty)) {
+            setError("Allocated quantity cannot exceed available quantity");
+            return;
+        }
+
+        setError(""); // clear error if valid
 
         const selectedItem = items.find((i) => i._id === itemId);
 
@@ -65,141 +84,142 @@ export default function PurchaseItemModal({ onClose, onSave, initialItem, custom
     };
 
     return (
-        <>
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
+            <div className="bg-white rounded-xl w-full max-w-sm max-h-[90vh] p-4 shadow-lg relative border overflow-y-auto">
+                {/* Header */}
+                <div className="flex justify-between items-center mb-3">
+                    <h2 className="text-base font-bold text-teal-700">
+                        {initialItem ? "Edit Purchase Item" : "Add Purchase Item"}
+                    </h2>
+                    <button onClick={onClose} className="text-gray-500 hover:text-black text-lg">
+                        <CloseOutlined />
+                    </button>
+                </div>
 
-            <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
-                {/* <pre>{JSON.stringify(items,null,4)}</pre> */}
-                <div className="bg-white rounded-xl w-full max-w-sm max-h-[90vh] p-4 shadow-lg relative border overflow-y-auto">
-                    {/* Header */}
-                    <div className="flex justify-between items-center mb-3">
-                        <h2 className="text-base font-bold text-teal-700">
-                            {initialItem ? "Edit Purchase Item" : "Add Purchase Item"}
-                        </h2>
-                        <button onClick={onClose} className="text-gray-500 hover:text-black text-lg">
-                            <CloseOutlined />
-                        </button>
+                {/* Form Content */}
+                <div className="space-y-3">
+                    {/* Item Name */}
+                    <div>
+                        <label className="block text-sm font-medium mb-1">
+                            Item Name: <span className="text-red-500">*</span>
+                        </label>
+                        <select
+                            value={itemId}
+                            onChange={(e) => handleItemChange(e.target.value)}
+                            className="w-full border rounded px-2 py-1 text-sm"
+                        >
+                            <option value="">Select an item</option>
+                            {items.map((it) => (
+                                <option key={it._id} value={it._id}>
+                                    {it.name}
+                                </option>
+                            ))}
+                        </select>
                     </div>
 
-                    {/* Form Content */}
-                    <div className="space-y-3">
-                        {/* Item Name */}
-                        <div>
-                            <label className="block text-sm font-medium mb-1">
-                                Item Name: <span className="text-red-500">*</span>
-                            </label>
-                            <select
-                                value={itemId}
-                                onChange={(e) => handleItemChange(e.target.value)}
-                                className="w-full border rounded px-2 py-1 text-sm"
-                            >
-                                <option value="">Select an item</option>
-                                {items.map((it) => (
-                                    <option key={it._id} value={it._id}>
-                                        {it.name}
-                                    </option>
-                                ))}
-                            </select>
-                        </div>
-
-                        {/* Available Qty */}
-                        <div>
-                            <label className="block text-sm font-medium mb-1">Available Qty:</label>
-                            <p className="text-gray-700 text-sm">{availableQty}</p>
-                        </div>
-
-                        {/* Allocated Qty */}
-                        <div>
-                            <label className="block text-sm font-medium mb-1">
-                                Allocated Qty: <span className="text-red-500">*</span>
-                            </label>
-                            <input
-                                type="number"
-                                value={allocatedQty}
-                                onChange={(e) => setAllocatedQty(e.target.value)}
-                                className="w-full border rounded px-2 py-1 text-sm"
-                            />
-                        </div>
-
-                        {/* Remaining Qty */}
-                        <div>
-                            <label className="block text-sm font-medium mb-1">Remaining Qty:</label>
-                            <p className="text-sm">{availableQty - (allocatedQty || 0)}</p>
-                        </div>
-
-                        {/* Unit Cost */}
-                        <div>
-                            <label className="block text-sm font-medium mb-1">
-                                Unit Cost: <span className="text-red-500">*</span>
-                            </label>
-                            <input
-                                type="number"
-                                value={unitCost}
-                                onChange={(e) => setUnitCost(e.target.value)}
-                                className="w-full border rounded px-2 py-1 text-sm"
-                            />
-                        </div>
-
-                        {/* Purchase Price */}
-                        <div>
-                            <label className="block text-sm font-medium mb-1">
-                                Purchase Price: <span className="text-red-500">*</span>
-                            </label>
-                            <input
-                                type="number"
-                                value={purchasePrice}
-                                onChange={(e) => setPurchasePrice(e.target.value)}
-                                className="w-full border rounded px-2 py-1 text-sm"
-                            />
-                        </div>
-
-                        {/* Invoice No */}
-                        <div>
-                            <label className="block text-sm font-medium mb-1">
-                                Invoice No: <span className="text-red-500">*</span>
-                            </label>
-                            <input
-                                type="text"
-                                value={invoiceNo}
-                                onChange={(e) => setInvoiceNo(e.target.value)}
-                                className="w-full border rounded px-2 py-1 text-sm"
-                            />
-                        </div>
-
-                        {/* Invoice Date */}
-                        <div>
-                            <label className="block text-sm font-medium mb-1">
-                                Invoice Date: <span className="text-red-500">*</span>
-                            </label>
-                            <input
-                                type="date"
-                                value={invoiceDate}
-                                onChange={(e) => setInvoiceDate(e.target.value)}
-                                className="w-full border rounded px-2 py-1 text-sm"
-                            />
-                        </div>
+                    {/* Available Qty */}
+                    <div>
+                        <label className="block text-sm font-medium mb-1">Available Qty:</label>
+                        <p className="text-gray-700 text-sm">{availableQty}</p>
                     </div>
 
-                    {/* Buttons */}
-                    <div className="mt-4 flex gap-3 justify-end">
-                        <button
-                            onClick={handleSave}
-                            className="group text-white px-4 py-2 rounded flex items-center gap-2 cursor-pointer transition-all duration-300 transform hover:scale-105 shadow-md"
-                            style={{
-                                background: "linear-gradient(135deg, #667eea, #764ba2)",
-                                boxShadow: "0 4px 14px rgba(118, 75, 162, 0.4)",
-                            }}
-                        >
-                            Save
-                        </button>
-                        <button
-                            onClick={onClose}
-                            className="bg-red-600 text-white px-6 py-2 rounded shadow hover:bg-red-700 cursor-pointer hover:scale-105"
-                        >
-                            Cancel
-                        </button>
+                    {/* Allocated Qty */}
+                    <div>
+                        <label className="block text-sm font-medium mb-1">
+                            Allocated Qty: <span className="text-red-500">*</span>
+                        </label>
+                        <input
+                            type="number"
+                            value={allocatedQty}
+                            onChange={(e) => handleAllocatedQtyChange(e.target.value)}
+                            className={`w-full border rounded px-2 py-1 text-sm ${
+                                error ? "border-red-500" : "border-gray-300"
+                            }`}
+                        />
+                        {error && (
+                            <p className="text-red-500 text-xs mt-1">{error}</p>
+                        )}
+                    </div>
+
+                    {/* Remaining Qty */}
+                    <div>
+                        <label className="block text-sm font-medium mb-1">Remaining Qty:</label>
+                        <p className="text-sm">{availableQty - (allocatedQty || 0)}</p>
+                    </div>
+
+                    {/* Unit Cost */}
+                    <div>
+                        <label className="block text-sm font-medium mb-1">
+                            Unit Cost: <span className="text-red-500">*</span>
+                        </label>
+                        <input
+                            type="number"
+                            value={unitCost}
+                            onChange={(e) => setUnitCost(e.target.value)}
+                            className="w-full border rounded px-2 py-1 text-sm"
+                        />
+                    </div>
+
+                    {/* Purchase Price */}
+                    <div>
+                        <label className="block text-sm font-medium mb-1">
+                            Purchase Price: <span className="text-red-500">*</span>
+                        </label>
+                        <input
+                            type="number"
+                            value={purchasePrice}
+                            onChange={(e) => setPurchasePrice(e.target.value)}
+                            className="w-full border rounded px-2 py-1 text-sm"
+                        />
+                    </div>
+
+                    {/* Invoice No */}
+                    <div>
+                        <label className="block text-sm font-medium mb-1">
+                            Invoice No: <span className="text-red-500">*</span>
+                        </label>
+                        <input
+                            type="text"
+                            value={invoiceNo}
+                            onChange={(e) => setInvoiceNo(e.target.value)}
+                            className="w-full border rounded px-2 py-1 text-sm"
+                        />
+                    </div>
+
+                    {/* Invoice Date */}
+                    <div>
+                        <label className="block text-sm font-medium mb-1">
+                            Invoice Date: <span className="text-red-500">*</span>
+                        </label>
+                        <input
+                            type="date"
+                            value={invoiceDate}
+                            onChange={(e) => setInvoiceDate(e.target.value)}
+                            className="w-full border rounded px-2 py-1 text-sm"
+                        />
                     </div>
                 </div>
+
+                {/* Buttons */}
+                <div className="mt-4 flex gap-3 justify-end">
+                    <button
+                        onClick={handleSave}
+                        className="group text-white px-4 py-2 rounded flex items-center gap-2 cursor-pointer transition-all duration-300 transform hover:scale-105 shadow-md"
+                        style={{
+                            background: "linear-gradient(135deg, #667eea, #764ba2)",
+                            boxShadow: "0 4px 14px rgba(118, 75, 162, 0.4)",
+                        }}
+                    >
+                        Save
+                    </button>
+                    <button
+                        onClick={onClose}
+                        className="bg-red-600 text-white px-6 py-2 rounded shadow hover:bg-red-700 cursor-pointer hover:scale-105"
+                    >
+                        Cancel
+                    </button>
+                </div>
             </div>
-        </>
+        </div>
     );
 }

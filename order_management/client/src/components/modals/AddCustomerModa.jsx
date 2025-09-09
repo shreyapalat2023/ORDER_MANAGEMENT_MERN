@@ -23,7 +23,16 @@ export default function CustomerModal({ onClose, onCustomerSaved, customerToEdit
 
   useEffect(() => {
     if (isEditing && customerToEdit) {
-      setForm({ ...customerToEdit });
+      setForm({
+        name: customerToEdit.name || "",
+        email: customerToEdit.email || "",
+        phone: customerToEdit.phone ? String(customerToEdit.phone) : "",
+        address: customerToEdit.address || "",
+        state: customerToEdit.state || "",
+        city: customerToEdit.city || "",
+        gstn: customerToEdit.gstn || "",
+        status: customerToEdit.status || "Active",
+      });
     } else {
       setForm({
         name: "",
@@ -40,7 +49,7 @@ export default function CustomerModal({ onClose, onCustomerSaved, customerToEdit
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
-    setErrors({ ...errors, [e.target.name]: "" }); // clear error while typing
+    setErrors({ ...errors, [e.target.name]: "" });
   };
 
   const validateForm = () => {
@@ -73,30 +82,32 @@ export default function CustomerModal({ onClose, onCustomerSaved, customerToEdit
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = async () => {
-    if (!validateForm()) {
-      toast.error("Please fix the validation errors");
-      return;
-    }
+ const handleSubmit = async () => {
+  if (!validateForm()) {
+    toast.error("Please fix the validation errors");
+    return;
+  }
 
-    try {
-      if (isEditing) {
-        await axios.put(`/customers/${customerToEdit._id}`, form);
-        toast.success("Customer updated");
-      } else {
-        const { data } = await axios.post("/customer", form);
-        if (data?.error) {
-          toast.error(data.error);
-          return;
-        }
-        toast.success("Customer added");
-      }
-      onCustomerSaved();
-      onClose();
-    } catch (error) {
+  try {
+    if (isEditing) {
+      await axios.put(`/customers/${customerToEdit._id}`, form);
+      toast.success("Customer updated");
+    } else {
+      await axios.post("/customer", form);
+      toast.success("Customer added");
+    }
+    onCustomerSaved();
+    onClose();
+  } catch (error) {
+    if (error.response && error.response.data && error.response.data.error) {
+      toast.error(error.response.data.error);  // ✅ Show exact backend error
+    } else {
       toast.error("Failed to save Customer");
     }
-  };
+    console.error("Customer save error:", error);
+  }
+};
+
 
   return (
     <div className="fixed inset-0 bg-black/30 flex items-center justify-center z-50">

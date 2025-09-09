@@ -22,7 +22,16 @@ export default function SupplierModal({ onClose, onSupplierSaved, supplierToEdit
 
   useEffect(() => {
     if (isEditing && supplierToEdit) {
-      setForm({ ...supplierToEdit });
+      setForm({
+        name: supplierToEdit.name || "",
+        email: supplierToEdit.email || "",
+        phone: supplierToEdit.phone ? String(supplierToEdit.phone) : "",
+        address: supplierToEdit.address || "",
+        state: supplierToEdit.state || "",
+        city: supplierToEdit.city || "",
+        gstn: supplierToEdit.gstn || "",
+        status: supplierToEdit.status || "Active",
+      });
     } else {
       setForm({
         name: "",
@@ -91,8 +100,12 @@ export default function SupplierModal({ onClose, onSupplierSaved, supplierToEdit
       onSupplierSaved();
       onClose();
     } catch (error) {
-      toast.error("Failed to save supplier");
-      console.error(error);
+      if (error.response && error.response.data && error.response.data.error) {
+        toast.error(error.response.data.error);  // ✅ Show exact backend error
+      } else {
+        toast.error("Failed to save Customer");
+      }
+      console.error("Customer save error:", error);
     }
   };
 

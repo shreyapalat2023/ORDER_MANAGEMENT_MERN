@@ -2,7 +2,7 @@ import { EditOutlined, DeleteOutlined, ArrowUpOutlined, ArrowDownOutlined } from
 import usePagination from "../../customhooks/usePagination.js";
 import Pagination from "../../components/pagination/Pagination.jsx";
 
-import { Tooltip } from "antd";
+import { Tooltip, Popconfirm } from "antd";
 const SupplierTable = (
     { filtered,
         handleEdit,
@@ -22,7 +22,7 @@ const SupplierTable = (
     } = usePagination(filtered, 4);
 
     console.log(paginatedData);
-    
+
 
     const getSortIcon = (field) => {
         if (sortField !== field) return null;
@@ -53,7 +53,7 @@ const SupplierTable = (
                             <th className="px-6 py-3 text-left whitespace-nowrap">Action</th>
                         </tr>
                     </thead>
-                    <tbody  className="divide-y divide-gray-100">
+                    <tbody className="divide-y divide-gray-100">
                         {paginatedData.length ? (
                             paginatedData.map((s, i) => (
                                 <tr key={i} className="hover:bg-blue-50 transition-all duration-200">
@@ -82,12 +82,19 @@ const SupplierTable = (
                                         </Tooltip>
 
                                         <Tooltip title="Delete">
-                                            <button
-                                                className="text-red-600 hover:text-red-800 transform transition duration-200 hover:scale-125 hover:shadow-sm cursor-pointer"
-                                                onClick={() => handleDelete(s._id)}
+                                            <Popconfirm
+                                                title="Are you sure you want to delete this?"
+                                                onConfirm={() => handleDelete(s._id)}
+                                                okText="Yes"
+                                                cancelText="No"
+                                                okButtonProps={{ className: "bg-red-600 hover:bg-red-700 text-white" }}
                                             >
-                                                <DeleteOutlined style={{ fontSize: "20px" }} />
-                                            </button>
+                                                <button
+                                                    className="text-red-600 hover:text-red-800 transform transition duration-200 hover:scale-125 hover:shadow-sm cursor-pointer"
+                                                >
+                                                    <DeleteOutlined style={{ fontSize: "20px" }} />
+                                                </button>
+                                            </Popconfirm>
                                         </Tooltip>
                                     </td>
                                 </tr>

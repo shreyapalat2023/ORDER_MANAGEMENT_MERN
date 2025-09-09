@@ -2,7 +2,10 @@ import mongoose, { mongo, Schema } from "mongoose";
 
 const customerPOSchema = new Schema(
     {
-        poNumber: String,
+        poNumber:{
+            type:String,
+            unique:true
+        },
         customer: { type: mongoose.Schema.Types.ObjectId, ref: "Customer" },
         date: Date,
         status: {

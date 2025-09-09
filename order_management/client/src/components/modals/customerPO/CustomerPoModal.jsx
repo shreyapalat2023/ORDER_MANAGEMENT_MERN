@@ -68,41 +68,48 @@ export default function CustomerPOModal({ onClose, onSave, po }) {
     }, []);
 
     const handleSubmit = async (e) => {
-        e.preventDefault();
+  e.preventDefault();
 
-        if (!customer || !date || !poNumber || !status) {
-            toast.error("All fields are required");
-            return;
-        }
+  if (!customer || !date || !poNumber || !status) {
+    toast.error("All fields are required");
+    return;
+  }
 
-        try {
-            setLoading(true);
+  try {
+    setLoading(true);
 
-            const payload = {
-                poNumber,
-                customer,
-                date,
-                status,
-                items: salesItems,
-            };
-
-            if (isEditing) {
-                await axios.put(`/customer-pos/${po._id}`, payload);
-                toast.success("Customer PO updated");
-            } else {
-                await axios.post("/customer-po", payload);
-                toast.success("Customer PO added");
-            }
-
-            onSave();
-            onClose();
-        } catch (err) {
-            console.error(err);
-            toast.error("Failed to save Customer PO");
-        } finally {
-            setLoading(false);
-        }
+    const payload = {
+      poNumber,
+      customer,
+      date,
+      status,
+      items: salesItems,
     };
+
+    if (isEditing) {
+      await axios.put(`/customer-pos/${po._id}`, payload);
+      toast.success("Customer PO updated");
+    } else {
+      await axios.post("/customer-po", payload);
+      toast.success("Customer PO added");
+    }
+
+    onSave();
+    onClose();
+  } catch (err) {
+    console.error(err);
+
+    // ✅ Show backend error if available
+    if (err.response && err.response.data?.error) {
+      toast.error(err.response.data.error);
+    } else {
+      toast.error("Failed to save Customer PO");
+    }
+  } finally {
+    setLoading(false);
+  }
+};
+
 
     const handleEditItem = (index) => {
         setEditingIndex(index);

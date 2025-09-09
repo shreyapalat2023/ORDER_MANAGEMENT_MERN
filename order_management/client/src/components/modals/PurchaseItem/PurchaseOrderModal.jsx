@@ -131,6 +131,7 @@ export default function PurchaseOrderModal({ onClose, onSave, purchaseOrder }) {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+
         if (!poNumber || !customerPO || !date || !status) {
             toast.error("All fields are required");
             return;
@@ -141,7 +142,7 @@ export default function PurchaseOrderModal({ onClose, onSave, purchaseOrder }) {
             0
         );
 
-        const formattedItems = purchaseItems.map(it => ({
+        const formattedItems = purchaseItems.map((it) => ({
             item: it.item?._id || it.item,
             qty: it.qty,
             unitCost: it.unitCost,
@@ -174,11 +175,18 @@ export default function PurchaseOrderModal({ onClose, onSave, purchaseOrder }) {
             onClose();
         } catch (err) {
             console.error("Save error:", err.response?.data || err.message);
-            toast.error(err.response?.data?.message || "Failed to save Purchase Order");
+
+            // ✅ Show backend error (e.g. "PO Number must be unique")
+            if (err.response?.data?.error) {
+                toast.error(err.response.data.error);
+            } else {
+                toast.error("Failed to save Purchase Order");
+            }
         } finally {
             setLoading(false);
         }
     };
+
 
     return (
         <div className="fixed inset-0 bg-black/30 flex items-center justify-center z-50">
@@ -210,11 +218,23 @@ export default function PurchaseOrderModal({ onClose, onSave, purchaseOrder }) {
                                     className="w-full border rounded px-3 py-2"
                                 >
                                     <option value="">Select Customer</option>
-                                    {customers.filter((cust) => cust.status === "Active")
+                                    {customers
+                                        // filter by customer status if populated
+                                        .filter((cpo) => cpo.customer && cpo.status === "Active")
+                                        // get unique customers so same customer doesn't repeat
+                                        .reduce((acc, cpo) => {
+                                            if (!acc.find((x) => x._id === cpo.customer._id)) {
+                                                acc.push(cpo.customer);
+                                            }
+                                            return acc;
+                                        }, [])
                                         .map((cust) => (
-                                            <option key={cust._id} value={cust.customer._id}>{cust.customer.name}</option>
+                                            <option key={cust._id} value={cust._id}>
+                                                {cust.name}
+                                            </option>
                                         ))}
                                 </select>
+
                             </div>
 
                             {/* Customer PO */}

@@ -7,38 +7,15 @@ const ManageItems = ({
     selectedSupplier,
     setSelectedSupplier,
     setOpenModal,
-    search,
     setSelectedItemName,
+    items,
+    selectedItemId,
+    setSelectedItemId
 }) => {
     return (
         <div className="flex items-center justify-between flex-wrap gap-2 mb-4">
             {/* Left Section: Filters */}
-            <div className="flex items-center gap-2 flex-wrap">
-                {/* Search Input */}
-                <div className="relative">
-                    <span className="absolute inset-y-0 left-2 flex items-center pointer-events-none text-gray-400">
-                        <svg
-                            className="w-4 h-4"
-                            fill="none"
-                            stroke="currentColor"
-                            strokeWidth="2"
-                            viewBox="0 0 24 24"
-                        >
-                            <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                d="M21 21l-4.35-4.35m0 0A7.5 7.5 0 1116.65 7.5a7.5 7.5 0 010 9.15z"
-                            />
-                        </svg>
-                    </span>
-                    <input
-                        type="text"
-                        placeholder="Search items"
-                        value={search}
-                        onChange={(e) => setSearch(e.target.value)}
-                        className="pl-8 pr-3 py-1.5 border border-blue-300 rounded-md text-sm w-[160px]"
-                    />
-                </div>
+            <div className="flex items-center gap-2 flex-wrap">    
 
                 {/* Supplier Dropdown */}
                 <select
@@ -56,11 +33,35 @@ const ManageItems = ({
                         ))}
                 </select>
 
+                {/* Items Dropdown */}
+                <select
+                    value={selectedItemId}
+                    onChange={(e) => {
+                        selectedItemId(e.target.value);
+                        setSelectedItemId(
+                            e.target.value
+                                ? items.find((i) => i._id === e.target.value)?.name || ""
+                                : ""
+                        );
+                    }}
+                    className="px-2 py-1.5 text-sm border border-gray-300 rounded-md shadow-sm focus:ring focus:ring-violet-300 w-[140px]"
+                >
+                    <option value="">All Items</option>
+                    {items
+                        .filter((i) => i.status?.toLowerCase() === "active")
+                        .map((i) => (
+                            <option key={i._id} value={i._id}>
+                                {i.name}
+                            </option>
+                        ))}
+                </select>
+
                 {/* Reset Button */}
                 <button
                     onClick={() => {
                         setSearch("");
                         setSelectedSupplier("");
+                        setSelectedItemId("");
                         setSelectedItemName("");
                     }}
                     className="px-3 py-1.5 text-sm text-white rounded transition duration-200 ease-in-out transform hover:scale-105 shadow-md cursor-pointer"

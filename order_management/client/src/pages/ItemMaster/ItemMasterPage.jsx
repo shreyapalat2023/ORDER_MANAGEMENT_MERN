@@ -139,6 +139,9 @@ export default function ItemMasterPage() {
                 setEditingItem={setEditingItem}
                 setOpenModal={setOpenModal}
                 search={search}
+                items={items}
+                selectedItem={selectedItem}
+                setSelectedItem={setSelectedItem}
 
             />
 
@@ -157,7 +160,7 @@ export default function ItemMasterPage() {
                         sortOrder={sortOrder}
                         setSelectedItem={setSelectedItem}
                         setIsStockModalOpen={setIsStockModalOpen}
-                        setIsDetailModalOpen= {setIsDetailModalOpen}
+                        setIsDetailModalOpen={setIsDetailModalOpen}
                     />
                 </>
 
@@ -184,12 +187,15 @@ export default function ItemMasterPage() {
                         setIsStockModalOpen(false);
                         setSelectedItem(null);
                     }}
+                    onItemSaved={fetchItems}
                 />
             )}
 
             {isDetailModalOpen && selectedItem && (
                 <ItemUtilizationModal
                     itemName={selectedItem.name}
+                    itemCategory={selectedItem.category}
+                    itemBrand={selectedItem.brand}
                     itemId={selectedItem._id}
                     items={items}
                     onClose={() => {

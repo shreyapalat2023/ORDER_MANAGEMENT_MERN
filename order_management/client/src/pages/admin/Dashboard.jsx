@@ -5,9 +5,10 @@ import {
   Button,
   Table,
   ConfigProvider,
+  Spin,
   Card,
 } from "antd";
-import { SearchOutlined } from "@ant-design/icons";
+import { SearchOutlined,LoadingOutlined } from "@ant-design/icons";
 import axios from "axios";
 import dayjs from "dayjs";
 
@@ -31,6 +32,8 @@ export default function Dashboard() {
   const [cpoAmount, setCpoAmount] = useState(0);
   const [itemCost, setItemCost] = useState(0);
   const [profitLoss, setProfitLoss] = useState(0);
+
+   const [loading, setLoading] = useState(false);
 
   // ✅ Fetch all purchase orders once
   useEffect(() => {
@@ -65,6 +68,9 @@ export default function Dashboard() {
         (po) => po.customer?._id === customer
       );
 
+      console.log("filteredOrders",filteredOrders);
+      
+
       // Unique CPOs
       const seenCpos = new Set();
       const relatedCpos = [];
@@ -72,8 +78,11 @@ export default function Dashboard() {
         if (po.customerPO && !seenCpos.has(po.customerPO._id)) {
           seenCpos.add(po.customerPO._id);
           relatedCpos.push(po.customerPO);
+    
         }
       });
+      console.log("relatedCpos",relatedCpos);
+      
       setCpos(relatedCpos);
 
       // POs belonging to this customer
@@ -92,6 +101,7 @@ export default function Dashboard() {
 
   // ✅ Handle Search
   const handleSearch = () => {
+    setLoading(true)
     axios
       .post("/dashboard/profitloss", {
         customer,
@@ -115,7 +125,7 @@ export default function Dashboard() {
       })
       .catch((err) =>
         console.error("Error fetching profit/loss:", err)
-      );
+      ).finally(() => setLoading(false))
   };
 
   // ✅ Table Columns
@@ -143,6 +153,9 @@ export default function Dashboard() {
   const selectedPo = pos.find((p) => p._id === po);
 
   return (
+    <>
+{/* <pre>{JSON.stringify([purchaseOrders],null,4)}</pre> */}
+
     <ConfigProvider
       theme={{
         components: {
@@ -157,145 +170,156 @@ export default function Dashboard() {
         },
       }}
     >
-      <div className="p-4">
-        <div className="bg-white rounded-xl shadow-md p-6">
-          <h2 className="text-2xl font-bold text-teal-800 mb-6">
-            Dashboard - Profit & Loss
-          </h2>
+      <Spin
+        spinning={loading}
+        tip="Loading..."
+        indicator={<LoadingOutlined spin style={{ fontSize: 40, color: "#764ba2" }} />}
+        size="large"
+      >
 
-          {/* Filters */}
-          <div className="flex flex-wrap gap-4 mb-6">
-            <Select
-              placeholder="Customer"
-              value={customer}
-              onChange={setCustomer}
-              className="w-40"
-              allowClear
-            >
-              {customers.map((c) => (
-                <Option key={c._id} value={c._id}>
-                  {c.name}
-                </Option>
-              ))}
-            </Select>
+        <div className="p-4">
+          <div className="bg-white rounded-xl shadow-md p-6">
+            <h2 className="text-2xl font-bold text-teal-800 mb-6">
+              Dashboard - Profit & Loss
+            </h2>
 
-            <RangePicker
-              className="w-64"
-              value={dateRange}
-              onChange={setDateRange}
-              format="DD-MM-YYYY"
-              allowClear
-            />
+            {/* Filters */}
+            <div className="flex flex-wrap gap-4 mb-6">
+              <Select
+                placeholder="Customer"
+                value={customer}
+               onChange={(value) => setCustomer(value)} 
+                className="w-40"
+                allowClear
+              >
+                {purchaseOrders
+                 .filter((c) => c.status?.toLowerCase() === "active")
+                 .map((c) => (
+                  <Option key={c._id} value={c.customer._id}>
+                    {c.customer.name}
+                  </Option>
+                ))}
+              </Select>
 
-            <Select
-              placeholder="Customer PO"
-              value={cpo}
-              onChange={setCpo}
-              className="w-40"
-              allowClear
-              disabled={!customer}
-            >
-              {cpos.map((cp) => (
-                <Option key={cp._id} value={cp._id}>
-                  {cp.poNumber}
-                </Option>
-              ))}
-            </Select>
-
-            <Select
-              placeholder="Purchase Order"
-              value={po}
-              onChange={setPo}
-              className="w-40"
-              allowClear
-              disabled={!customer}
-            >
-              {pos.map((p) => (
-                <Option key={p._id} value={p._id}>
-                  {p.poNumber}
-                </Option>
-              ))}
-            </Select>
-
-            <Button
-              type="primary"
-              icon={<SearchOutlined />}
-              onClick={handleSearch}
-              className="bg-gradient-to-r from-purple-500 to-indigo-500 text-white font-semibold rounded-lg"
-              style={{
-                background: "linear-gradient(135deg, #667eea, #764ba2)",
-              }}
-            >
-              Search
-            </Button>
-          </div>
-
-          {/* Details Section */}
-          <div className="grid md:grid-cols-3 gap-6">
-            <Card
-              title={`Customer PO Detail - ${selectedCpo?.poNumber || ""}`}
-              className="shadow-sm rounded-lg"
-            >
-              <Table
-                dataSource={customerPoDetails}
-                columns={customerPoColumns}
-                pagination={false}
-                rowKey={(record, i) => i}
-                size="small"
+              <RangePicker
+                className="w-64"
+                value={dateRange}
+                onChange={setDateRange}
+                format="DD-MM-YYYY"
+                allowClear
               />
-              <p className="mt-3 text-gray-700">
-                <span className="font-medium">Order Amount:</span> ₹{cpoAmount}
-              </p>
-            </Card>
 
-            <Card
-              title={`Purchase Order - ${selectedPo?.poNumber || ""}`}
-              className="shadow-sm rounded-lg"
-            >
-              <Table
-                dataSource={purchaseOrderDetails}
-                columns={purchaseOrderColumns}
-                pagination={false}
-                rowKey={(record, i) => i}
-                size="small"
-              />
-              <p className="mt-3 text-gray-700">
-                <span className="font-medium">Item Cost:</span> ₹{itemCost}
-              </p>
-            </Card>
+              <Select
+                placeholder="Customer PO"
+                value={cpo}
+                onChange={setCpo}
+                className="w-40"
+                allowClear
+                disabled={!customer}
+              >
+                {cpos.map((cp) => (
+                  <Option key={cp._id} value={cp._id}>
+                    {cp.poNumber}
+                  </Option>
+                ))}
+              </Select>
 
-            <Card
-              title={`Remaining Purchase Order - ${selectedPo?.poNumber || ""}`}
-              className="shadow-sm rounded-lg"
-            >
-              <Table
-                dataSource={remainingPurchaseOrder}
-                columns={remainingPoColumns}
-                pagination={false}
-                rowKey={(record, i) => i}
-                size="small"
-              />
-            </Card>
-          </div>
+              <Select
+                placeholder="Purchase Order"
+                value={po}
+                onChange={setPo}
+                className="w-40"
+                allowClear
+                disabled={!customer}
+              >
+                {pos.map((p) => (
+                  <Option key={p._id} value={p._id}>
+                    {p.poNumber}
+                  </Option>
+                ))}
+              </Select>
 
-          {/* Profit / Loss */}
-          <div
-            className={`text-center mt-6 font-bold text-lg ${
-              profitLoss >= 0 ? "text-green-600" : "text-red-600"
-            }`}
-          >
-            {profitLoss >= 0
-              ? `Profit: ₹${profitLoss}`
-              : `Loss: ₹${Math.abs(profitLoss)}`}
-          </div>
-
-          {selectedCustomer && (
-            <div className="text-center mt-2 text-gray-600">
-              Customer: {selectedCustomer.name}
+              <Button
+                type="primary"
+                icon={<SearchOutlined />}
+                onClick={handleSearch}
+                className="bg-gradient-to-r from-purple-500 to-indigo-500 text-white font-semibold rounded-lg"
+                style={{
+                  background: "linear-gradient(135deg, #667eea, #764ba2)",
+                }}
+              >
+                Search
+              </Button>
             </div>
-          )}
+
+            {/* Details Section */}
+            <div className="grid md:grid-cols-3 gap-6">
+              <Card
+                title={`Customer PO Detail - ${selectedCpo?.poNumber || ""}`}
+                className="shadow-sm rounded-lg"
+              >
+                <Table
+                  dataSource={customerPoDetails}
+                  columns={customerPoColumns}
+                  pagination={false}
+                  rowKey={(record, i) => i}
+                  size="small"
+                />
+                <p className="mt-3 text-gray-700">
+                  <span className="font-medium">Order Amount:</span> ₹{cpoAmount}
+                </p>
+              </Card>
+
+              <Card
+                title={`Purchase Order - ${selectedPo?.poNumber || ""}`}
+                className="shadow-sm rounded-lg"
+              >
+                <Table
+                  dataSource={purchaseOrderDetails}
+                  columns={purchaseOrderColumns}
+                  pagination={false}
+                  rowKey={(record, i) => i}
+                  size="small"
+                />
+                <p className="mt-3 text-gray-700">
+                  <span className="font-medium">Item Cost:</span> ₹{itemCost}
+                </p>
+              </Card>
+
+              <Card
+                title={`Remaining Purchase Order - ${selectedPo?.poNumber || ""}`}
+                className="shadow-sm rounded-lg"
+              >
+                <Table
+                  dataSource={remainingPurchaseOrder}
+                  columns={remainingPoColumns}
+                  pagination={false}
+                  rowKey={(record, i) => i}
+                  size="small"
+                />
+              </Card>
+            </div>
+
+            {/* Profit / Loss */}
+            <div
+              className={`text-center mt-6 font-bold text-lg ${profitLoss >= 0 ? "text-green-600" : "text-red-600"
+                }`}
+            >
+              {profitLoss >= 0
+                ? `Profit: ₹${profitLoss}`
+                : `Loss: ₹${Math.abs(profitLoss)}`}
+            </div>
+
+            {selectedCustomer && (
+              <div className="text-center mt-2 text-gray-600">
+                Customer: {selectedCustomer.name}
+              </div>
+            )}
+          </div>
         </div>
-      </div>
+      </Spin>
     </ConfigProvider>
+    
+    </>
   );
 }

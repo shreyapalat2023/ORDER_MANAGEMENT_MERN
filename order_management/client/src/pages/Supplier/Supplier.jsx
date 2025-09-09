@@ -109,7 +109,7 @@ export default function SupplierPage() {
           <SupplierTable
             filtered={filtered}
             handleEdit={handleEdit}
-            handleDeleteCustomer={handleDelete}
+            handleDelete={handleDelete}
             onSort={handleSort}
             sortField={sortField}
             sortOrder={sortOrder}

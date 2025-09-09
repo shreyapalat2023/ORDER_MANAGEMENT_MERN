@@ -93,7 +93,9 @@ export default function SalesItemModal({ onClose, onSave, editItem, itemList = [
                             className="w-full border rounded px-3 py-2"
                         >
                             <option value="">Select item</option>
-                            {itemList.map((it) => (
+                            {itemList
+                            .filter((it) => it.status === "Active")
+                            .map((it) => (
                                 <option key={it._id} value={it._id}>
                                     {it.name}
                                 </option>

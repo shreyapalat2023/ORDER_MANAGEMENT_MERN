@@ -42,8 +42,6 @@ export default function CustomerPage() {
     };
 
     const handleDeleteCustomer = async (customerId) => {
-        const confirm = window.confirm("Are you sure you want to delete this customer?");
-        if (!confirm) return;
         try {
             await axios.delete(`customers/${customerId}`);
             toast.success("Customer deleted successfully");
@@ -73,10 +71,6 @@ export default function CustomerPage() {
             setSortOrder("asc");
         }
     };
-
-
-
-
     return (
         <div className="bg-white p-6 rounded-lg shadow">
             <div className="flex justify-between items-center mb-6">
