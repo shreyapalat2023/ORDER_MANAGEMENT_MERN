@@ -79,34 +79,30 @@ export default function PurchaseOrderModal({ onClose, onSave, purchaseOrder }) {
         setPurchaseItems(prev => [...prev, item]);
     };
     //edit Item
-    const handleEditItem = async (index) => {
-        const itemToEdit = purchaseItems[index];
+   const handleEditItem = async (index) => {
+  const itemToEdit = purchaseItems[index];
+  setEditingItemIndex(index);
+  setShowItemModal(true); // open immediately
 
-        if (itemToEdit?._id) {
-            try {
-                const { data } = await axios.get(
-                    `/purchase-order/${purchaseOrder._id}/items/${itemToEdit._id}`
-                );
-                setEditingItemIndex(index);
-                setEditingItem(data)
-                setShowItemModal(true);
+  if (itemToEdit?._id && purchaseOrder?._id) {
+    try {
+      const { data } = await axios.get(
+        `/purchase-order/${purchaseOrder._id}/items/${itemToEdit._id}`
+      );
+      setEditingItem(data); // overwrite after load
+      console.log("editing item",data);
+      
+      
+    } catch (err) {
+      console.error("Failed to fetch item details:", err);
+      toast.error("Failed to load item details");
+    }
+  } else {
+    setEditingItem(itemToEdit);
+  }
+};
 
-                // Pass fresh data to modal
-                setPurchaseItems((prev) => {
-                    const updated = [...prev];
-                    updated[index] = data;
-                    return updated;
-                });
-            } catch (err) {
-                console.error("Failed to fetch item details:", err);
-                toast.error("Failed to load item details");
-            }
-        } else {
-            setEditingItemIndex(index);
-            setEditingItem(itemToEdit)
-            setShowItemModal(true);
-        }
-    };
+
 
 
     const handleSaveItem = (item) => {
@@ -196,7 +192,7 @@ export default function PurchaseOrderModal({ onClose, onSave, purchaseOrder }) {
                         <h2 className="text-xl font-bold text-teal-700">
                             {isEditing ? "Edit Purchase Order" : "Add Purchase Order"}
                         </h2>
-                        <button onClick={onClose} className="text-gray-500 hover:text-black text-xl">
+                        <button onClick={onClose} className="text-gray-500 hover:text-black text-xl cursor-pointer">
                             <CloseOutlined />
                         </button>
                     </div>
@@ -354,7 +350,7 @@ export default function PurchaseOrderModal({ onClose, onSave, purchaseOrder }) {
                         setEditingItemIndex(null);
                     }}
                     onSave={handleSaveItem}
-                    existingItem={editingItem}
+                    initialItem={editingItem}
                     customerPO={customerPO}
                     purchaseOrderId={purchaseItems._id}
                 />

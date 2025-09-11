@@ -1,6 +1,7 @@
-import { EditOutlined, DeleteOutlined } from "@ant-design/icons";
+import { EditOutlined, DeleteOutlined, ToolFilled } from "@ant-design/icons";
 import usePagination from "../../../customhooks/usePagination";
 import Pagination from "../../pagination/Pagination.jsx";
+import { Tooltip } from "antd";
 
 export default function PurchaseItemsTable({ items = [], onEditItem, onDeleteItem }) {
     console.log("items", items);
@@ -72,18 +73,24 @@ export default function PurchaseItemsTable({ items = [], onEditItem, onDeleteIte
                                         </td>
 
                                         <td className="px-4 py-2 border text-center">
-                                            <button
-                                                className="text-blue-500 hover:text-blue-700 mr-2"
-                                                onClick={() => onEditItem(item)}
-                                            >
-                                                <EditOutlined />
-                                            </button>
-                                            <button
-                                                className="text-red-500 hover:text-red-700"
-                                                onClick={() => onDeleteItem(item)}
-                                            >
-                                                <DeleteOutlined />
-                                            </button>
+                                            <Tooltip title="Edit">
+
+                                                <button
+                                                    className="text-blue-500 hover:scale-110 mr-2 cursor-pointer"
+                                                    onClick={() => onEditItem(index)}
+                                                >
+                                                    <EditOutlined />
+                                                </button>
+                                            </Tooltip>
+                                            <Tooltip title="Delete">
+
+                                                <button
+                                                    className="text-red-500 hover:scale-110 cursor-pointer"
+                                                    onClick={() => onDeleteItem(item)}
+                                                >
+                                                    <DeleteOutlined />
+                                                </button>
+                                            </Tooltip>
                                         </td>
                                     </tr>
                                 ))

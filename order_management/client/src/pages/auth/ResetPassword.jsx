@@ -3,6 +3,7 @@ import { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import axios from "axios";
 import toast from "react-hot-toast";
+import { EyeInvisibleOutlined, EyeOutlined,LockOutlined } from "@ant-design/icons"
 
 export default function ResetPassword() {
     const navigate = useNavigate();
@@ -10,6 +11,9 @@ export default function ResetPassword() {
     const email = location.state?.email || "";
 
     const [newPassword, setNewPassword] = useState("");
+
+    const [showPassword, setShowPassword] = useState(false);
+
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -35,16 +39,26 @@ export default function ResetPassword() {
             <div className="w-full max-w-md bg-white rounded-xl shadow-lg p-8">
                 <h2 className="text-2xl font-semibold text-center mb-6 text-gray-800">Reset Password</h2>
                 <form className="space-y-5" onSubmit={handleSubmit}>
-                    <div>
+                    <div className="relative">
                         <label className="block text-sm font-medium text-gray-700">New Password</label>
+                        <span className="absolute left-3 top-8 text-gray-500">
+                            <LockOutlined />
+                        </span>
                         <input
-                            type="password"
+                            type={showPassword ? "text" : "password"}
                             value={newPassword}
                             onChange={(e) => setNewPassword(e.target.value)}
-                            className="mt-1 block w-full px-4 py-2  rounded-md shadow-sm focus:outline-none focus:ring focus:ring-violet-300"
+                            className="mt-1 block w-full px-8 py-2  rounded-md shadow-sm focus:outline-none focus:ring focus:ring-violet-300"
                             placeholder="At least 6 characters"
                             required
                         />
+                        <span
+                            className="absolute right-3 top-8 text-gray-500 cursor-pointer"
+                            onClick={() => setShowPassword(!showPassword)}
+                        >
+                            {showPassword ? <EyeInvisibleOutlined /> : <EyeOutlined />}
+                        </span>
+
                     </div>
                     <button
                         type="submit"

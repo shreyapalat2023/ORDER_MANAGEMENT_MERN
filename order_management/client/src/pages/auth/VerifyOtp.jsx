@@ -1,9 +1,10 @@
-import { useState } from "react";
+import { useState ,useEffect} from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import axios from "axios";
 import toast from "react-hot-toast";
 
 export default function VerifyOtp() {
+  const [timer, setTimer] = useState(60);
   const [otp, setOtp] = useState("");
   const navigate = useNavigate();
   const location = useLocation();
@@ -15,6 +16,14 @@ export default function VerifyOtp() {
     navigate("/forgot-password");
     return null;
   }
+  useEffect(() => {
+    if (timer > 0) {
+      const interval = setInterval(() => {
+        setTimer((prev) => prev - 1);
+      }, 1000);
+      return () => clearInterval(interval);
+    }
+  }, [timer]);
 
   const handleVerify = async (e) => {
     e.preventDefault();
@@ -31,6 +40,7 @@ export default function VerifyOtp() {
     try {
       const { data } = await axios.post("/resend-otp", { email });
       toast.success(data?.message || "OTP resent");
+      setTimer(60);
     } catch (err) {
       toast.error("Failed to resend OTP");
     }
@@ -57,7 +67,7 @@ export default function VerifyOtp() {
 
         <button
           type="submit"
-          className="w-full bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-purple-600 hover:to-indigo-500 text-white font-medium py-2 px-4 rounded relative overflow-hidden group transition-all duration-500 cursor-pointer"
+          className="w-full bg-gradient-to-r from-indigo-500 mt-4 to-purple-600 hover:from-purple-600 hover:to-indigo-500 text-white font-medium py-2 px-4 rounded relative overflow-hidden group transition-all duration-500 cursor-pointer"
         >
           <span
             className="inline-block transform transition-transform duration-500 group-hover:translate-x-1"
@@ -65,6 +75,11 @@ export default function VerifyOtp() {
             Verify Otp
           </span>
         </button>
+
+        <p className="text-sm text-gray-600 mt-4 text-center">
+          OTP will expire in{" "}
+          <span className="font-semibold text-red-600">{timer}s</span>
+        </p>
 
         <p className="text-sm text-gray-600 mt-4 text-center">
           Didn't receive code?{" "}

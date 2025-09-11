@@ -5,7 +5,7 @@ import toast from "react-hot-toast";
 
 export default function PurchaseItemModal({ onClose, onSave, initialItem, customerPO }) {
     const [items, setItems] = useState([]);
-    const [itemId, setItemId] = useState(initialItem?.item || "");
+    const [itemId, setItemId] = useState(initialItem?.item._id || "");
     const [availableQty, setAvailableQty] = useState(initialItem?.availableQty || 0);
     const [allocatedQty, setAllocatedQty] = useState(initialItem?.qty || "");
     const [unitCost, setUnitCost] = useState(initialItem?.unitCost || "");
@@ -28,6 +28,7 @@ export default function PurchaseItemModal({ onClose, onSave, initialItem, custom
         } catch (error) {
             toast.error("Failed to fetch CustomerPO items");
         }
+        
     };
 
     const handleItemChange = (id) => {
@@ -39,6 +40,7 @@ export default function PurchaseItemModal({ onClose, onSave, initialItem, custom
             setAvailableQty(0);
         }
         setAllocatedQty(""); // reset when changing item
+        setPurchasePrice("");
         setError("");
     };
 
@@ -48,40 +50,67 @@ export default function PurchaseItemModal({ onClose, onSave, initialItem, custom
             setError("Allocated quantity cannot exceed available quantity");
         } else {
             setError("");
+            if (unitCost) {
+                setPurchasePrice(Number(unitCost) * Number(value));
+            }
         }
     };
 
-    const handleSave = () => {
-        if (!itemId || !allocatedQty || !unitCost || !purchasePrice || !invoiceNo || !invoiceDate) {
-            setError("All required fields must be filled");
-            return;
+    const handleUnitCostChange = (value) => {
+        setUnitCost(value);
+        if (allocatedQty) {
+            setPurchasePrice(Number(value) * Number(allocatedQty));
         }
-
-        if (Number(allocatedQty) > Number(availableQty)) {
-            setError("Allocated quantity cannot exceed available quantity");
-            return;
-        }
-
-        setError(""); // clear error if valid
-
-        const selectedItem = items.find((i) => i._id === itemId);
-
-        const newItem = {
-            item: itemId,
-            itemName: selectedItem?.name || "",
-            availableQty: Number(availableQty),
-            qty: Number(allocatedQty),
-            remainingQty: Number(availableQty) - Number(allocatedQty),
-            unitCost: Number(unitCost),
-            purchasePrice: Number(purchasePrice),
-            invoiceNo,
-            invoiceDate,
-            amount: Number(purchasePrice),
-        };
-
-        onSave(newItem);
-        onClose();
     };
+
+   const handleSave = () => {
+  if (
+    !itemId ||
+    allocatedQty === "" ||
+    !unitCost ||
+    !purchasePrice ||
+    !invoiceNo ||
+    !invoiceDate
+  ) {
+    setError("All required fields must be filled");
+    return;
+  }
+
+  if (Number(allocatedQty) > Number(availableQty)) {
+    setError("Allocated quantity cannot exceed available quantity");
+    return;
+  }
+
+  setError("");
+
+  const selectedItem = items.find((i) => i._id === itemId);
+
+  const newItem = {
+    item: itemId,
+    itemName: selectedItem?.name || "",
+    availableQty: Number(availableQty),
+    qty: Number(allocatedQty),
+    remainingQty: Number(availableQty) - Number(allocatedQty),
+    unitCost: Number(unitCost),
+    purchasePrice: Number(purchasePrice),
+    invoiceNo,
+    invoiceDate,
+    amount: Number(purchasePrice),
+  };
+
+  if (initialItem) {
+    // ✅ editing existing
+    onSave({ ...newItem, _id: initialItem._id });
+    toast.success("Item Updated");
+  } else {
+    // ✅ adding new
+    onSave(newItem);
+    toast.success("Item Added");
+  }
+
+  onClose();
+};
+
 
     return (
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
@@ -132,9 +161,8 @@ export default function PurchaseItemModal({ onClose, onSave, initialItem, custom
                             type="number"
                             value={allocatedQty}
                             onChange={(e) => handleAllocatedQtyChange(e.target.value)}
-                            className={`w-full border rounded px-2 py-1 text-sm ${
-                                error ? "border-red-500" : "border-gray-300"
-                            }`}
+                            className={`w-full border rounded px-2 py-1 text-sm ${error ? "border-red-500" : "border-gray-300"
+                                }`}
                         />
                         {error && (
                             <p className="text-red-500 text-xs mt-1">{error}</p>
@@ -155,12 +183,12 @@ export default function PurchaseItemModal({ onClose, onSave, initialItem, custom
                         <input
                             type="number"
                             value={unitCost}
-                            onChange={(e) => setUnitCost(e.target.value)}
+                            onChange={(e) => handleUnitCostChange(e.target.value)}
                             className="w-full border rounded px-2 py-1 text-sm"
                         />
                     </div>
 
-                    {/* Purchase Price */}
+                    {/* Purchase Price (auto) */}
                     <div>
                         <label className="block text-sm font-medium mb-1">
                             Purchase Price: <span className="text-red-500">*</span>
@@ -168,8 +196,8 @@ export default function PurchaseItemModal({ onClose, onSave, initialItem, custom
                         <input
                             type="number"
                             value={purchasePrice}
-                            onChange={(e) => setPurchasePrice(e.target.value)}
-                            className="w-full border rounded px-2 py-1 text-sm"
+                            readOnly
+                            className="w-full border rounded px-2 py-1 text-sm bg-gray-100"
                         />
                     </div>
 
@@ -210,7 +238,7 @@ export default function PurchaseItemModal({ onClose, onSave, initialItem, custom
                             boxShadow: "0 4px 14px rgba(118, 75, 162, 0.4)",
                         }}
                     >
-                        Save
+                        {initialItem ? "Update" : "Save"}
                     </button>
                     <button
                         onClick={onClose}

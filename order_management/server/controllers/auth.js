@@ -121,7 +121,7 @@ export const forgotPassword = async (req, res) => {
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
     console.log("user otp:", otp)
     user.otp = otp;
-    user.otpExpiry = Date.now() + 10 * 60 * 1000;
+    user.otpExpiry = Date.now() + 60 * 1000;
     await user.save();
 
     // Email configuration
@@ -188,7 +188,7 @@ export const resendOtp = async (req, res) => {
     // Generate new OTP
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
     user.otp = otp;
-    user.otpExpiry = Date.now() + 10 * 60 * 1000; // 10 minutes
+    user.otpExpiry = Date.now() + 60 * 1000; // 60 seconds
     await user.save();
 
     // Setup Nodemailer
