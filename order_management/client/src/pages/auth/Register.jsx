@@ -14,6 +14,9 @@ export default function Register() {
     //context
     const [auth, setAuth] = useAuth();
 
+    //error
+    const [passwordError, setPasswordError] = useState("");
+
     //navigate
     const navigate = useNavigate();
     const handleSubmit = async (e) => {
@@ -38,6 +41,26 @@ export default function Register() {
         } catch (error) {
             console.error("❌ Registration error:", error.response || error.message);
             toast.error("Registration Failed. Try Again");
+        }
+    };
+
+    // live validation while typing
+    const handlePasswordChange = (e) => {
+        const value = e.target.value;
+        setPassword(value);
+
+        if (!value) {
+            setPasswordError("Password is required");
+        } else if (value.length < 8) {
+            setPasswordError("Password must be at least 8 characters long");
+        } else if (!/[A-Z]/.test(value)) {
+            setPasswordError("Password must contain at least one uppercase letter");
+        } else if (!/[!@#$%^&*]/.test(value)) {
+            setPasswordError("Password must contain at least one special character");
+        } else if (!/\d/.test(value)) {
+            setPasswordError("Password must contain at least one number");
+        } else {
+            setPasswordError(""); // no errors
         }
     };
 
@@ -82,32 +105,40 @@ export default function Register() {
 
                     {/* Password */}
                     <div className="relative">
-                        <label htmlFor="password" className="block text-sm font-medium text-gray-700">Password</label>
+                        <label
+                            htmlFor="password"
+                            className="block text-sm font-medium text-gray-700"
+                        >
+                            Password
+                        </label>
 
-                        {/* Left Lock Icon */}
                         <span className="absolute left-3 top-8 text-gray-500">
                             <LockOutlined />
                         </span>
 
-                        {/* Password Input */}
                         <input
                             id="password"
                             name="password"
                             type={showPassword ? "text" : "password"}
                             value={password}
-                            onChange={(e) => setPassword(e.target.value)}
+                            onChange={handlePasswordChange}
                             required
-                            className="mt-1 block w-full px-10 py-2 pr-10 rounded-md shadow-sm focus:outline-none focus:ring focus:ring-violet-300"
+                            className={`mt-1 block w-full px-10 py-2 pr-10 rounded-md shadow-sm focus:outline-none focus:ring focus:ring-violet-300 ${passwordError ? "border-red-500" : ""
+                                }`}
                         />
 
-                        {/* Right Eye Toggle */}
                         <span
                             className="absolute right-3 top-8 text-gray-500 cursor-pointer"
                             onClick={() => setShowPassword(!showPassword)}
                         >
                             {showPassword ? <EyeInvisibleOutlined /> : <EyeOutlined />}
                         </span>
+
+                        {passwordError && (
+                            <p className="text-red-500 text-xs mt-1">{passwordError}</p>
+                        )}
                     </div>
+
 
                     <div className="flex items-center justify-between text-sm">
                         <button

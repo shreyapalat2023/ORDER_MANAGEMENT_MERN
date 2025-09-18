@@ -3,7 +3,7 @@ import { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import axios from "axios";
 import toast from "react-hot-toast";
-import { EyeInvisibleOutlined, EyeOutlined,LockOutlined } from "@ant-design/icons"
+import { EyeInvisibleOutlined, EyeOutlined, LockOutlined } from "@ant-design/icons"
 
 export default function ResetPassword() {
     const navigate = useNavigate();
@@ -13,7 +13,8 @@ export default function ResetPassword() {
     const [newPassword, setNewPassword] = useState("");
 
     const [showPassword, setShowPassword] = useState(false);
-
+    //error
+    const [passwordError, setPasswordError] = useState("");
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -33,6 +34,24 @@ export default function ResetPassword() {
             toast.error("Something went wrong");
         }
     };
+    const handlePasswordChange = (e) => {
+        const value = e.target.value;
+        setNewPassword(value);
+
+        if (!value) {
+            setPasswordError("Password is required");
+        } else if (value.length < 8) {
+            setPasswordError("Password must be at least 8 characters long");
+        } else if (!/[A-Z]/.test(value)) {
+            setPasswordError("Password must contain at least one uppercase letter");
+        } else if (!/[!@#$%^&*]/.test(value)) {
+            setPasswordError("Password must contain at least one special character");
+        } else if (!/\d/.test(value)) {
+            setPasswordError("Password must contain at least one number");
+        } else {
+            setPasswordError(""); // no errors
+        }
+    };
 
     return (
         <div className="min-h-screen flex items-center justify-center bg-gray-100">
@@ -47,7 +66,7 @@ export default function ResetPassword() {
                         <input
                             type={showPassword ? "text" : "password"}
                             value={newPassword}
-                            onChange={(e) => setNewPassword(e.target.value)}
+                            onChange={handlePasswordChange}
                             className="mt-1 block w-full px-8 py-2  rounded-md shadow-sm focus:outline-none focus:ring focus:ring-violet-300"
                             placeholder="At least 6 characters"
                             required
@@ -58,6 +77,10 @@ export default function ResetPassword() {
                         >
                             {showPassword ? <EyeInvisibleOutlined /> : <EyeOutlined />}
                         </span>
+
+                        {passwordError && (
+                            <p className="text-red-500 text-xs mt-1">{passwordError}</p>
+                        )}
 
                     </div>
                     <button

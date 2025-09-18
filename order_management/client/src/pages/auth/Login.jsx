@@ -16,6 +16,10 @@ import { useAuth } from "../../context/auth";
 
 
 export default function Login() {
+
+    const passwordRegex =
+        /^(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*])[A-Za-z\d!@#$%^&*]{8,}$/;
+
     //hooks
     const [email, setEmail] = useState("palatshreya@gmail.com");
     const [password, setPassword] = useState("shrgar@89");
@@ -23,6 +27,8 @@ export default function Login() {
     const [showPassword, setShowPassword] = useState(false);
 
     const [loading, setLoading] = useState(false);
+    //error
+    const [passwordError, setPasswordError] = useState("");
 
     //saving user login response in context
     const [auth, setAuth] = useAuth();
